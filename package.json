@@ -1,0 +1,55 @@
+{
+  "name": "teacher-website",
+  "version": "1.0.0",
+  "description": "A multilingual responsive website for teaching physics and mathematics.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "build:start": "next build && next start",
+    "deploy": "vercel --prod",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.50.0",
+    "autoprefixer": "^10.4.16",
+    "clsx": "^2.1.1",
+    "dompurify": "^3.0.6",
+    "isomorphic-dompurify": "^1.9.0",
+    "next": "^14.0.4",
+    "postcss": "^8.4.32",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "tailwind-merge": "^3.3.0",
+    "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5",
+    "@types/node": "^20.10.4",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.17",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "^14.0.4",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "prettier": "^3.1.1",
+    "typescript": "^5.8.3"
+  },
+  "keywords": [
+    "nextjs",
+    "react",
+    "tailwindcss",
+    "supabase",
+    "google-meet",
+    "zoom",
+    "multilingual",
+    "education",
+    "responsive"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
