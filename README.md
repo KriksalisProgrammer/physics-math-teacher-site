@@ -160,6 +160,15 @@ To add content in both languages:
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions on deploying to Vercel.
 
+## 🔒 Security
+
+**Important:** Never commit your `.env.local` file to version control. It contains sensitive API keys and credentials.
+
+- The `.env.local.example` file shows the required environment variables structure
+- Always use environment variables for sensitive data
+- In production, set environment variables through your hosting platform (Vercel, etc.)
+- Review and rotate API keys regularly
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
