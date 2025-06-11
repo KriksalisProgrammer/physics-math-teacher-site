@@ -20,15 +20,12 @@ async function Footer({ locale }: { locale: string }) {
                   {locale === 'uk' ? 'Фізика & Математика' : 'Physics & Math'}
                 </h3>
                 <p className="text-gray-400">
-                  {locale === 'uk' ? 'Онлайн навчання' : 'Online Learning'}
+                  {common.online_learning}
                 </p>
               </div>
             </div>
             <p className="text-gray-300 leading-relaxed mb-6 max-w-md">
-              {locale === 'uk' 
-                ? 'Сучасний підхід до навчання фізики та математики з інтерактивними уроками, персональною підтримкою та підготовкою до ЗНО.'
-                : 'Modern approach to learning physics and mathematics with interactive lessons, personal support and exam preparation.'
-              }
+              {common.modern_approach_detailed}
             </p>
             
             {/* Social Links */}
@@ -48,7 +45,7 @@ async function Footer({ locale }: { locale: string }) {
           {/* Navigation Links */}
           <div>
             <h4 className="text-lg font-semibold mb-6 text-white">
-              {locale === 'uk' ? 'Навігація' : 'Navigation'}
+              {common.navigation}
             </h4>
             <ul className="space-y-3">
               <li>
