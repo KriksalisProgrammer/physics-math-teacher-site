@@ -9,14 +9,14 @@ export type Json =
 
 export interface Database {
   public: {
-    Tables: {
-      profiles: {
+    Tables: {      profiles: {
         Row: {
           id: string
           email: string
           role: 'student' | 'teacher' | 'admin'
           first_name: string | null
           last_name: string | null
+          age: number | null
           avatar_url: string | null
           created_at: string
           updated_at: string
@@ -27,6 +27,7 @@ export interface Database {
           role?: 'student' | 'teacher' | 'admin'
           first_name?: string | null
           last_name?: string | null
+          age?: number | null          age?: number | null
           avatar_url?: string | null
           created_at?: string
           updated_at?: string
@@ -37,6 +38,7 @@ export interface Database {
           role?: 'student' | 'teacher' | 'admin'
           first_name?: string | null
           last_name?: string | null
+          age?: number | null
           avatar_url?: string | null
           created_at?: string
           updated_at?: string

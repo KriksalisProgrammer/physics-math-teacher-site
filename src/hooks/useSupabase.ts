@@ -53,10 +53,14 @@ export function useSupabase() {
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, metadata?: { first_name: string; last_name: string; age?: number }) => {
     return await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: metadata,
+        emailRedirectTo: `${window.location.origin}/api/auth/callback`
+      }
     });
   };
 

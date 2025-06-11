@@ -93,7 +93,7 @@ export default function DashboardPage() {
             )}
           </div>
           <div className="mt-4">
-            <Link href={`/${locale}/dashboard/profile`}>
+            <Link href={`/${locale}/profile`}>
               <Button variant="secondary" className="w-full">
                 {dictionary.dashboard?.editProfile || "Edit Profile"}
               </Button>

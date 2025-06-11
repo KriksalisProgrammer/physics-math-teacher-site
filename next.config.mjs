@@ -10,14 +10,6 @@ const nextConfig = {
       'lh3.googleusercontent.com'
     ],
     formats: ['image/avif', 'image/webp']
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: '/api/:path*',
-      },
-    ]
   }
 }
 

@@ -3,6 +3,51 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Function to create profile after user signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, role, first_name, last_name, age)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    'student',
+    COALESCE(
+      NEW.raw_user_meta_data->>'first_name', 
+      NEW.raw_user_meta_data->>'firstName',
+      NEW.user_metadata->>'first_name',
+      NEW.user_metadata->>'firstName',
+      ''
+    ),
+    COALESCE(
+      NEW.raw_user_meta_data->>'last_name', 
+      NEW.raw_user_meta_data->>'lastName',
+      NEW.user_metadata->>'last_name',
+      NEW.user_metadata->>'lastName',
+      ''
+    ),
+    CASE 
+      WHEN NEW.raw_user_meta_data->>'age' IS NOT NULL AND NEW.raw_user_meta_data->>'age' != ''
+      THEN (NEW.raw_user_meta_data->>'age')::integer 
+      WHEN NEW.user_metadata->>'age' IS NOT NULL AND NEW.user_metadata->>'age' != ''
+      THEN (NEW.user_metadata->>'age')::integer
+      ELSE NULL 
+    END
+  );
+  RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Log error but don't fail the user creation
+    RAISE LOG 'Error creating profile for user %: %', NEW.id, SQLERRM;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to automatically create profile
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 -- Profiles Table (extended from auth.users)
 CREATE TABLE IF NOT EXISTS profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -10,6 +55,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'teacher', 'admin')),
     first_name TEXT,
     last_name TEXT,
+    age INTEGER CHECK (age >= 5 AND age <= 100),
     avatar_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -81,13 +127,19 @@ CREATE POLICY "Users can update their own profiles"
     ON profiles FOR UPDATE 
     USING (auth.uid() = id);
 
--- Only admins can create profiles (handled by auth hook)
-CREATE POLICY "Only admins can create profiles" 
+-- Profiles can be created by auth trigger or admins
+CREATE POLICY "Profiles can be created by auth trigger or admins" 
     ON profiles FOR INSERT 
-    WITH CHECK (role = 'admin' OR EXISTS (
-        SELECT 1 FROM profiles
-        WHERE id = auth.uid() AND role = 'admin'
-    ));
+    WITH CHECK (
+        -- Allow if it's the user's own profile (auth trigger)
+        auth.uid() = id 
+        OR 
+        -- Allow if current user is admin
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
 
 -- Blog Posts RLS
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
@@ -225,21 +277,6 @@ CREATE POLICY "Teachers and admins can delete lessons"
         )
     );
 
--- Create function to handle new user creation
-CREATE OR REPLACE FUNCTION public.handle_new_user() 
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, role)
-  VALUES (new.id, new.email, 'student');
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Trigger to create a profile record when a new user signs up
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
-
 -- Function to update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_timestamp()
 RETURNS TRIGGER AS $$
@@ -269,3 +306,20 @@ CREATE TRIGGER update_news_timestamp
 CREATE TRIGGER update_lessons_timestamp
   BEFORE UPDATE ON lessons
   FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+
+-- Storage setup for avatars
+-- Create avatars bucket (run this in Supabase Dashboard -> Storage)
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+
+-- Storage policies for avatars bucket
+-- CREATE POLICY "Avatar images are publicly accessible" ON storage.objects
+--   FOR SELECT TO public USING (bucket_id = 'avatars');
+
+-- CREATE POLICY "Anyone can upload an avatar" ON storage.objects
+--   FOR INSERT TO public WITH CHECK (bucket_id = 'avatars');
+
+-- CREATE POLICY "Anyone can update their own avatar" ON storage.objects
+--   FOR UPDATE TO authenticated USING (auth.uid()::text = (storage.foldername(name))[1]);
+
+-- CREATE POLICY "Anyone can delete their own avatar" ON storage.objects
+--   FOR DELETE TO authenticated USING (auth.uid()::text = (storage.foldername(name))[1]);

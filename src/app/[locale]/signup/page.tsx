@@ -14,6 +14,9 @@ function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [age, setAge] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -26,7 +29,19 @@ function SignupPage() {
     setError(null);
     setMessage(null);
     
-    // Password validation
+    // Validation
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('Пожалуйста, введите имя и фамилию');
+      setLoading(false);
+      return;
+    }
+
+    if (age && (parseInt(age) < 5 || parseInt(age) > 100)) {
+      setError('Возраст должен быть от 5 до 100 лет');
+      setLoading(false);
+      return;
+    }
+    
     if (password !== confirmPassword) {
       setError(dictionary.auth.passwordsDoNotMatch);
       setLoading(false);
@@ -34,7 +49,16 @@ function SignupPage() {
     }
 
     try {
-      const { data, error } = await signUp(email, password);
+      const metadata: any = {
+        first_name: firstName.trim(),
+        last_name: lastName.trim()
+      };
+      
+      if (age) {
+        metadata.age = parseInt(age);
+      }
+
+      const { data, error } = await signUp(email, password, metadata);
       
       if (error) throw error;
       
@@ -71,12 +95,37 @@ function SignupPage() {
       )}
       
       <Form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Имя"
+            type="text"
+            value={firstName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+            required
+          />
+          <Input
+            label="Фамилия"
+            type="text"
+            value={lastName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
+            required
+          />
+        </div>
         <Input
           label={dictionary.auth.email}
           type="email"
           value={email}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
           required
+        />
+        <Input
+          label="Возраст (необязательно)"
+          type="number"
+          min="5"
+          max="100"
+          value={age}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAge(e.target.value)}
+          placeholder="Введите ваш возраст"
         />
         <Input
           label={dictionary.auth.password}

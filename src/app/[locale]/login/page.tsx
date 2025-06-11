@@ -15,6 +15,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showResendEmail, setShowResendEmail] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
   const router = useRouter();
   const { signIn } = useSupabase();
 
@@ -22,18 +25,79 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setShowResendEmail(false);
 
     try {
       const { data, error } = await signIn(email, password);
       
-      if (error) throw error;
+      if (error) {
+        // Проверяем различные типы ошибок и показываем понятные сообщения
+        if (error.message.includes('Invalid login credentials') || 
+            error.message.includes('invalid_credentials')) {
+          
+          // Проверяем статус email подтверждения
+          try {
+            const checkResponse = await fetch('/api/auth/check-status', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email })
+            });
+            
+            if (checkResponse.ok) {
+              const statusData = await checkResponse.json();
+              if (statusData.status === 'email_not_confirmed') {
+                setError('Пожалуйста, подтвердите свой email. Проверьте папку входящих сообщений и папку спам.');
+                setShowResendEmail(true);
+                return;
+              }
+            }
+          } catch (checkError) {
+            // Если проверка не удалась, показываем общее сообщение
+          }
+          
+          setError('Неверный email или пароль. Если вы только что зарегистрировались, убедитесь, что подтвердили email.');
+        } else {
+          setError(error.message || dictionary.auth.loginFailed);
+        }
+        return;
+      }
       
       // Redirect to dashboard on success
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      setError(error.message || dictionary.auth.loginFailed);
+      setError('Произошла ошибка при входе. Попробуйте еще раз.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (!email) {
+      setResendMessage('Пожалуйста, введите email');
+      return;
+    }
+
+    setResendLoading(true);
+    setResendMessage(null);
+
+    try {
+      const response = await fetch('/api/auth/resend-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setResendMessage('Письмо с подтверждением отправлено повторно. Проверьте папку входящих сообщений.');
+      } else {
+        setResendMessage(data.error || 'Ошибка при отправке письма');
+      }
+    } catch (error) {
+      setResendMessage('Ошибка при отправке письма');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -46,6 +110,30 @@ export default function LoginPage() {
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
+        </div>
+      )}
+
+      {showResendEmail && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
+          <p className="mb-2">Не получили письмо с подтверждением?</p>
+          <button 
+            type="button"
+            onClick={handleResendEmail}
+            disabled={resendLoading}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+          >
+            {resendLoading ? 'Отправляем...' : 'Отправить повторно'}
+          </button>
+        </div>
+      )}
+
+      {resendMessage && (
+        <div className={`border px-4 py-3 rounded mb-4 ${
+          resendMessage.includes('отправлено') 
+            ? 'bg-green-100 border-green-400 text-green-700' 
+            : 'bg-red-100 border-red-400 text-red-700'
+        }`}>
+          {resendMessage}
         </div>
       )}
 

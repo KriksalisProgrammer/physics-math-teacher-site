@@ -7,61 +7,53 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const { pathname } = request.nextUrl;
     
     // Handle locale redirects
-    if (
-        pathname === '/' ||
-        (pathname !== '/uk' &&
-            pathname !== '/en' &&
-            !pathname.startsWith('/uk/') &&
-            !pathname.startsWith('/en/'))
-    ) {
+    const supportedLocales = ['uk', 'en'];
+    const pathnameWithoutLocale = pathname.split('/').slice(2).join('/');
+    const currentLocale = pathname.split('/')[1];
+    
+    // If no locale or unsupported locale, redirect to supported locale
+    if (pathname === '/' || !supportedLocales.includes(currentLocale)) {
         // Get preferred locale from cookie or default to Ukrainian
         const locale = request.cookies.get('NEXT_LOCALE')?.value || 'uk';
-        return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
+        const redirectPath = pathname === '/' ? `/${locale}` : `/${locale}${pathname}`;
+        return NextResponse.redirect(new URL(redirectPath, request.url));
     }
     
     // Authentication handling
     if ((pathname.includes('/admin') || pathname.includes('/dashboard'))) {
-        // Get auth token from cookie
-        const sessionCookie = request.cookies.get('sb-auth-token')?.value;
+        let response = NextResponse.next();
         
-        if (!sessionCookie) {
-            // Get the locale from the path
-            const locale = pathname.split('/')[1] || 'uk';
-            return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
-        }
-        
-        // Check if it's an admin page and user has teacher role
-        if (pathname.includes('/admin')) {
-            const response = NextResponse.next();
-            const supabaseClient = createServerClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-                {
-                    cookies: {
-                        get(name) {
-                            return request.cookies.get(name)?.value;
-                        },
-                        set(name, value, options) {
-                            response.cookies.set(name, value);
-                        },
-                        remove(name, options) {
-                            response.cookies.delete(name);
-                        },
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    get(name: string) {
+                        return request.cookies.get(name)?.value
                     },
-                }
-            );
+                    set(name: string, value: string, options: any) {
+                        response.cookies.set({ name, value, ...options })
+                    },
+                    remove(name: string, options: any) {
+                        response.cookies.set({ name, value: '', ...options })
+                    },
+                },
+            }
+        )
 
-            try {
-                const { data: { user } } = await supabaseClient.auth.getUser(sessionCookie);
-                
-                if (!user) {
-                    // No valid user, redirect to login
-                    const locale = pathname.split('/')[1] || 'uk';
-                    return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
-                }
-                
+        try {
+            const { data: { user }, error } = await supabase.auth.getUser()
+            
+            if (error || !user) {
+                // No valid user, redirect to login
+                const locale = pathname.split('/')[1] || 'uk';
+                return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+            }
+            
+            // Check if it's an admin page and user has appropriate role
+            if (pathname.includes('/admin')) {
                 // Get user role from profiles table
-                const { data: profile } = await supabaseClient
+                const { data: profile } = await supabase
                     .from('profiles')
                     .select('role')
                     .eq('id', user.id)
@@ -72,11 +64,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
                     const locale = pathname.split('/')[1] || 'uk';
                     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
                 }
-            } catch (error) {
-                // Error checking role, redirect to login
-                const locale = pathname.split('/')[1] || 'uk';
-                return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
             }
+            
+            return response;
+        } catch (error) {
+            // Error checking authentication, redirect to login
+            const locale = pathname.split('/')[1] || 'uk';
+            return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
         }
     }
 
