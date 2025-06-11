@@ -80,10 +80,10 @@ export default async function HomePage({
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
-              Чому обирають наші уроки?
+              {common.why_choose_our_lessons}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Сучасний підхід до навчання фізики та математики з інтерактивними уроками та персональною підтримкою
+              {common.modern_approach_description}
             </p>
           </div>
           
@@ -92,9 +92,9 @@ export default async function HomePage({
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">🔬</span>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Інтерактивні експерименти</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">{common.interactive_experiments}</h3>
               <p className="text-gray-600 leading-relaxed">
-                Віртуальні лабораторії та симуляції для кращого розуміння фізичних процесів
+                {common.virtual_labs_description}
               </p>
             </div>
             
@@ -102,9 +102,9 @@ export default async function HomePage({
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">📊</span>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Персоналізований підхід</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">{common.personalized_approach}</h3>
               <p className="text-gray-600 leading-relaxed">
-                Індивідуальні завдання та відслідковування прогресу для кожного учня
+                {common.individual_tasks_description}
               </p>
             </div>
             
@@ -112,9 +112,9 @@ export default async function HomePage({
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">🎯</span>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Підготовка до ЗНО</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">{common.exam_preparation}</h3>
               <p className="text-gray-600 leading-relaxed">
-                Спеціалізовані курси та тести для успішного складання зовнішнього незалежного оцінювання
+                {common.specialized_courses_description}
               </p>
             </div>
           </div>
@@ -215,16 +215,16 @@ export default async function HomePage({
       <section className="py-20 bg-gradient-to-r from-blue-900 to-indigo-900 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Готовий почати навчання?
+            {common.ready_to_start_learning}
           </h2>
           <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
-            Приєднуйся до наших онлайн-уроків та відкрий для себе захоплюючий світ фізики та математики
+            {common.join_online_lessons}
           </p>
           <Link
             href={`/${locale}/signup`}
             className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
           >
-            🚀 Розпочати навчання
+            {common.start_learning}
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
