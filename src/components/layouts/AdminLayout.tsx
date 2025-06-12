@@ -10,7 +10,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     
     return (
         <div className="flex flex-col h-screen">
-            <Header locale={locale} />
+            <Header />
             <div className="flex flex-1">
                 <ResponsiveSidebar />
                 <main className="flex-1 p-4 lg:p-6 bg-gray-100 overflow-y-auto">

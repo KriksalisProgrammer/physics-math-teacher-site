@@ -4,15 +4,14 @@ import Footer from '../common/Footer';
 
 interface MainLayoutProps {
     children: React.ReactNode;
-    locale: string;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, locale }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
         <div className="flex flex-col min-h-screen">
-            <Header locale={locale} />
+            <Header />
             <main className="flex-grow">{children}</main>
-            <Footer locale={locale} />
+            <Footer />
         </div>
     );
 };

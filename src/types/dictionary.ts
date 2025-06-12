@@ -80,23 +80,53 @@ export interface AdminSidebarDictionary {
   [key: string]: string;
 }
 
+export interface AdminCommentsDictionary {
+  total: string;
+  commentModeration?: string;
+  commentModerationDescription?: string;
+  all: string;
+  pending: string;
+  approved: string;
+  rejected: string;
+  commentOn: string;
+  rating: string;
+  moderate: string;
+  bulkActions: string;
+  selectAll: string;
+  approveSelected: string;
+  deleteSelected: string;
+  [key: string]: string | undefined;
+}
+
 export interface AdminDictionary {
   dashboard: string;
   posts: string;
   news: string;
   lessons: string;
-  comments: string;
+  commentsModeration: string;
+  userManagement: string;
+  analytics: string;
+  settings: string;
   create_new: string;
   edit: string;
   delete: string;
+  view: string;
+  publish: string;
+  unpublish: string;
+  archive: string;
+  restore: string;
+  duplicate: string;
+  export: string;
+  import: string;
   approve: string;
   reject: string;
   languages: AdminLanguagesDictionary;
   form: AdminFormDictionary;
   sidebar?: AdminSidebarDictionary;
+  commentsDetails?: AdminCommentsDictionary;
   backToSite?: string;
   adminPanel?: string;
-  [key: string]: string | AdminLanguagesDictionary | AdminFormDictionary | AdminSidebarDictionary | undefined;
+  [key: string]: string | AdminLanguagesDictionary | AdminFormDictionary | AdminSidebarDictionary | AdminCommentsDictionary | undefined;
 }
 
 export interface BlogDictionary {
@@ -139,7 +169,76 @@ export interface LessonsDictionary {
   upcoming_lesson: string;
   jitsiError: string;
   jitsiLoadError: string;
-  meetingError: string;
+  meetingError: string;  [key: string]: string;
+}
+
+export interface ProfileDictionary {
+  title: string;
+  personalInfo: string;
+  editProfile: string;
+  saveChanges: string;
+  cancel: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  bio: string;
+  profileUpdated: string;
+  errorUpdating: string;  [key: string]: string;
+}
+
+export interface NavigationDictionary {
+  home: string;
+  lessons: string;
+  blog: string;
+  news: string;
+  dashboard: string;
+  [key: string]: string;
+}
+
+export interface ApplicationsDictionary {
+  title: string;
+  page_title: string;
+  page_description: string;
+  subtitle: string;
+  subject: string;
+  lesson_type: string;
+  preferred_date: string;
+  preferred_time: string;
+  duration: string;
+  contact_method: string;
+  phone: string;
+  telegram: string;
+  message: string;
+  message_placeholder: string;
+  select_subject: string;
+  select_type: string;
+  mathematics: string;
+  physics: string;
+  chemistry: string;
+  english: string;
+  ukrainian: string;
+  programming: string;
+  individual: string;
+  group: string;
+  consultation: string;
+  preparation: string;
+  duration_30: string;
+  duration_60: string;
+  duration_90: string;
+  duration_120: string;
+  submit: string;
+  submitting: string;
+  submit_another: string;
+  success_title: string;
+  success_message: string;
+  error: string;
+  feature_1_title: string;
+  feature_1_desc: string;
+  feature_2_title: string;
+  feature_2_desc: string;
+  feature_3_title: string;
+  feature_3_desc: string;
   [key: string]: string;
 }
 
@@ -150,4 +249,7 @@ export interface Dictionary {
   blog: BlogDictionary;
   dashboard: DashboardDictionary;
   lessons: LessonsDictionary;
+  navigation: NavigationDictionary;
+  profile: ProfileDictionary;
+  applications: ApplicationsDictionary;
 }

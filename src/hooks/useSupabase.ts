@@ -66,9 +66,30 @@ export function useSupabase() {
       password,
     });
   };
-
   const signOut = async () => {
     return await supabase.auth.signOut();
+  };
+
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!session?.user) {
+      throw new Error('No authenticated user');
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', session.user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setProfile(data);
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
   };
 
   return {
@@ -78,6 +99,7 @@ export function useSupabase() {
     signUp,
     signIn,
     signOut,
+    updateProfile,
     supabase
   };
 }

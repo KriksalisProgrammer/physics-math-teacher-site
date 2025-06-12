@@ -14,10 +14,19 @@ const CommentsPage = () => {
 
     return (
         <AdminLayout>
-            <div className="p-4">
-                <h1 className="text-2xl font-bold mb-6">
-                    {dictionary.admin?.comments || 'Comments Moderation'}
-                </h1>
+            <div className="p-6">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        {typeof dictionary.admin?.commentsDetails === 'object' 
+                            ? dictionary.admin.commentsDetails.commentModeration || dictionary.admin.commentsDetails.total
+                            : 'Comments Moderation'}
+                    </h1>
+                    <p className="text-gray-600">
+                        {typeof dictionary.admin?.commentsDetails === 'object' 
+                            ? dictionary.admin.commentsDetails.commentModerationDescription
+                            : 'Manage and moderate user comments'}
+                    </p>
+                </div>
                 <CommentModeration />
             </div>
         </AdminLayout>

@@ -1,8 +1,10 @@
-import Link from 'next/link';
-import { getDictionary } from '@/lib/dictionaries';
+'use client';
 
-async function Footer({ locale }: { locale: string }) {
-  const { common } = await getDictionary(locale);
+import Link from 'next/link';
+import { useDictionary } from '@/lib/useDictionary';
+
+function Footer() {
+  const { dictionary, locale } = useDictionary();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -18,14 +20,13 @@ async function Footer({ locale }: { locale: string }) {
               <div>
                 <h3 className="text-2xl font-bold text-white">
                   {locale === 'uk' ? 'Фізика & Математика' : 'Physics & Math'}
-                </h3>
-                <p className="text-gray-400">
-                  {common.online_learning}
+                </h3>                <p className="text-gray-400">
+                  {dictionary.common?.online_learning || 'Онлайн навчання'}
                 </p>
               </div>
             </div>
             <p className="text-gray-300 leading-relaxed mb-6 max-w-md">
-              {common.modern_approach_detailed}
+              {dictionary.common?.modern_approach_detailed || 'Сучасний підхід до навчання фізики та математики з досвідченими викладачами'}
             </p>
             
             {/* Social Links */}
@@ -43,29 +44,28 @@ async function Footer({ locale }: { locale: string }) {
           </div>
           
           {/* Navigation Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-6 text-white">
-              {common.navigation}
+          <div>            <h4 className="text-lg font-semibold mb-6 text-white">
+              {dictionary.common?.navigation || 'Навігація'}
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link href={`/${locale}`} className="text-gray-300 hover:text-white transition-colors flex items-center gap-2">
-                  🏠 {common.home}
+                  🏠 {dictionary.common?.home || 'Головна'}
                 </Link>
               </li>
               <li>
                 <Link href={`/${locale}/blog`} className="text-gray-300 hover:text-white transition-colors flex items-center gap-2">
-                  📝 {common.blog}
+                  📝 {dictionary.common?.blog || 'Блог'}
                 </Link>
               </li>
               <li>
                 <Link href={`/${locale}/news`} className="text-gray-300 hover:text-white transition-colors flex items-center gap-2">
-                  📰 {common.news}
+                  📰 {dictionary.common?.news || 'Новини'}
                 </Link>
               </li>
               <li>
                 <Link href={`/${locale}/lessons`} className="text-gray-300 hover:text-white transition-colors flex items-center gap-2">
-                  🎓 {common.lessons}
+                  🎓 {dictionary.common?.lessons || 'Уроки'}
                 </Link>
               </li>
             </ul>

@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS profiles (
     role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'teacher', 'admin')),
     first_name TEXT,
     last_name TEXT,
+    phone TEXT,
+    bio TEXT,
+    age INTEGER,
     avatar_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -62,6 +65,27 @@ CREATE TABLE IF NOT EXISTS lessons (
     content_en TEXT,
     meeting_link TEXT, -- Ссылка на Google Meet, Zoom или другой сервис
     author_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Applications Table
+CREATE TABLE IF NOT EXISTS applications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    user_email TEXT NOT NULL,
+    user_name TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    lesson_type TEXT NOT NULL CHECK (lesson_type IN ('individual', 'group', 'consultation', 'preparation')),
+    preferred_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    duration INTEGER NOT NULL DEFAULT 60,
+    message TEXT NOT NULL,
+    contact_method TEXT NOT NULL DEFAULT 'email' CHECK (contact_method IN ('email', 'phone', 'telegram')),
+    phone TEXT,
+    telegram TEXT,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'completed')),
+    admin_notes TEXT,
+    assigned_teacher_id UUID REFERENCES profiles(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -225,20 +249,48 @@ CREATE POLICY "Teachers and admins can delete lessons"
         )
     );
 
--- Create function to handle new user creation
-CREATE OR REPLACE FUNCTION public.handle_new_user() 
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, role)
-  VALUES (new.id, new.email, 'student');
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- Applications RLS
+ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 
--- Trigger to create a profile record when a new user signs up
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+-- Anyone can read their own applications
+CREATE POLICY "Users can view their own applications" 
+    ON applications FOR SELECT 
+    USING (auth.uid() = user_id);
+
+-- Admins can view all applications
+CREATE POLICY "Admins can view all applications" 
+    ON applications FOR SELECT 
+    USING (
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- Only admins can create applications
+CREATE POLICY "Only admins can create applications" 
+    ON applications FOR INSERT 
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- Users can update their own applications
+CREATE POLICY "Users can update their own applications" 
+    ON applications FOR UPDATE 
+    USING (auth.uid() = user_id);
+
+-- Only admins can approve or reject applications
+CREATE POLICY "Admins can approve or reject applications" 
+    ON applications FOR UPDATE 
+    USING (
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
 
 -- Function to update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_timestamp()
@@ -268,4 +320,8 @@ CREATE TRIGGER update_news_timestamp
   
 CREATE TRIGGER update_lessons_timestamp
   BEFORE UPDATE ON lessons
+  FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+
+CREATE TRIGGER update_applications_timestamp
+  BEFORE UPDATE ON applications
   FOR EACH ROW EXECUTE PROCEDURE update_timestamp();

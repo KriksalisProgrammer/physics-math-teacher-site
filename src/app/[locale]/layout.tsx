@@ -50,11 +50,11 @@ export default async function LocaleLayout({
       </head>
       <body className={`flex flex-col min-h-screen bg-gray-50 antialiased ${inter.className}`}>
         {/* <NavbarTest /> */}
-        <Header locale={locale} />
+        <Header />
         <main className="flex-grow pt-20">
           {children}
         </main>
-        <Footer locale={locale} />
+        <Footer />
       </body>
     </html>
   );
