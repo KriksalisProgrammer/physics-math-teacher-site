@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDictionary } from '../../lib/useDictionary';
 import { supabase } from '../../lib/supabase';
 import { SupabaseComment } from '../../types/supabase';
@@ -8,10 +8,10 @@ interface CommentWithDetails extends SupabaseComment {
   content_title?: string;
   content_type?: string;
   profiles?: {
-    first_name?: string;
-    last_name?: string;
+    first_name?: string | null;
+    last_name?: string | null;
     email?: string;
-  };
+  } | null;
 }
 
 const CommentModeration: React.FC = () => {
@@ -27,39 +27,39 @@ const CommentModeration: React.FC = () => {
     return typeof value === 'string' ? value : key;
   };
 
-  useEffect(() => {
-    fetchComments();
-  }, [filter]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     setLoading(true);
     
-    // Create a query that joins comments with profiles to get author information
-    let query = supabase
-      .from('comments')
-      .select(`
-        *,
-        profiles:author_id (first_name, last_name, email)
-      `)
-      .order('created_at', { ascending: false });
-      
-    // Apply filter if needed
-    if (filter === 'pending') {
-      query = query.eq('is_approved', false);
-    } else if (filter === 'approved') {
-      query = query.eq('is_approved', true);
-    }
-    
-    const { data, error } = await query;
+    try {
+      // Create a query that joins comments with profiles to get author information
+      let query = supabase
+        .from('comments')
+        .select(`
+          *,
+          profiles:author_id (first_name, last_name, email)
+        `)
+        .order('created_at', { ascending: false });
+        
+      // Apply filter if needed
+      if (filter === 'pending') {
+        query = query.eq('is_approved', false);
+      } else if (filter === 'approved') {
+        query = query.eq('is_approved', true);
+      }
 
-    if (error) {
-      console.error('Error fetching comments:', error);
-    } else {
+      const { data, error } = await query;
+      if (error) throw error;
+      
       // Fetch post/news titles for each comment
       const commentsWithContent = await Promise.all(
-        data.map(async (comment: any) => {
+        (data || []).map(async (comment: any) => {
+          let enhancedComment = {
+            ...comment,
+            profiles: comment.profiles || null
+          };
+
+          // Try to get post title if post_id exists
           if (comment.post_id) {
-            // Try to get post title
             const { data: postData } = await supabase
               .from('posts')
               .select('title_uk, title_en')
@@ -67,21 +67,26 @@ const CommentModeration: React.FC = () => {
               .single();
               
             if (postData) {
-              return { 
-                ...comment, 
-                content_title: postData.title_uk || postData.title_en,
-                content_type: 'post' 
-              };
+              enhancedComment.content_title = postData.title_uk || postData.title_en;
+              enhancedComment.content_type = 'post';
             }
           }
-          return comment;
+          
+          return enhancedComment;
         })
       );
       
       setComments(commentsWithContent);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
 
   const handleApprove = async (id: string) => {
     const { error } = await supabase

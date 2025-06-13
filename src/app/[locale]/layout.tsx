@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer';
 import type { Metadata } from 'next';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
+import NotificationContainer from '@/components/ui/NotificationContainer';
 // import NavbarTest from '@/components/common/NavbarTest';
 import type { User, Session } from '@supabase/supabase-js';
 import '../../styles/globals.css';
@@ -25,6 +26,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     description: dictionary.common.welcome_message
   };
 }
+
+export const dynamic = 'force-dynamic';
 
 export default async function LocaleLayout({
   children,
@@ -55,6 +58,7 @@ export default async function LocaleLayout({
           {children}
         </main>
         <Footer />
+        <NotificationContainer />
       </body>
     </html>
   );

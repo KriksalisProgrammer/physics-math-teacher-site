@@ -2,7 +2,12 @@ import { getDictionary } from '@/lib/dictionaries';
 import Link from 'next/link';
 import PostCard from '@/components/blog/PostCard';
 import NewsCard from '@/components/news/NewsCard';
+import Stats from '@/components/common/Stats';
+import Features from '@/components/common/Features';
+import CTASection from '@/components/common/CTASection';
 import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 // Get the latest posts and news from Supabase
 async function getLatestContent() {
@@ -31,20 +36,27 @@ export default async function HomePage({
   const { common } = await getDictionary(locale);
   const { posts, news } = await getLatestContent();
   
-  return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
+  return (    <div className="min-h-screen">
+      {/* Hero Section with Enhanced Design */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white">
         <div className="absolute inset-0 bg-black/20"></div>
+        
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+        </div>
+        
         <div className="relative container mx-auto px-4 py-24 lg:py-32">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-200 to-cyan-200 bg-clip-text text-transparent">
+            <h1 className="text-5xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-200 via-cyan-200 to-purple-200 bg-clip-text text-transparent animate-fade-in-up animate-gradient-shift">
               {common.welcome_title}
             </h1>
-            <p className="text-xl lg:text-2xl mb-8 text-blue-100 leading-relaxed">
+            <p className="text-xl lg:text-2xl mb-8 text-blue-100 leading-relaxed animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               {common.welcome_message}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{animationDelay: '0.4s'}}>
               <Link 
                 href={`/${locale}/blog`}
                 className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
@@ -72,11 +84,47 @@ export default async function HomePage({
         </div>
         {/* Animated background elements */}
         <div className="absolute top-10 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-gradient-to-r from-blue-900 via-purple-900 to-indigo-900 text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4 animate-fade-in-up">
+              {common.our_achievements || "Наші досягнення"}
+            </h2>
+            <p className="text-blue-200 text-lg animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+              {common.achievements_desc || "Цифри, які говорять самі за себе"}
+            </p>
+          </div>
+          <Stats dictionary={common} />
+        </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      {/* Features Section with Enhanced Design */}
+      <section className="py-20 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{animationDelay: '1.5s'}}></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-cyan-200 to-purple-200 bg-clip-text text-transparent animate-fade-in-up">
+              {common.why_choose_our_lessons || "Чому обирають наші уроки"}
+            </h2>
+            <p className="text-xl text-blue-200 max-w-3xl mx-auto animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+              {common.modern_approach_description || "Сучасний підхід до навчання з використанням найновіших технологій"}
+            </p>
+          </div>
+          
+          <Features dictionary={common} />
+        </div>
+      </section>
+
+      {/* Legacy Features (keeping for fallback) */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white hidden">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
@@ -208,29 +256,10 @@ export default async function HomePage({
               </div>
             )}
           </div>
-        </div>
-      </section>
+        </div>      </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-900 to-indigo-900 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            {common.ready_to_start_learning}
-          </h2>
-          <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
-            {common.join_online_lessons}
-          </p>
-          <Link
-            href={`/${locale}/signup`}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
-          >
-            {common.start_learning}
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
-        </div>
-      </section>
+      {/* Enhanced CTA Section */}
+      <CTASection locale={locale} dictionary={common} />
     </div>
   );
 }

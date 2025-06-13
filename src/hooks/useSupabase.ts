@@ -52,11 +52,13 @@ export function useSupabase() {
       setProfile(null);
     }
   };
-
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, options?: { first_name?: string; last_name?: string; age?: number | null }) => {
     return await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: options
+      }
     });
   };
 

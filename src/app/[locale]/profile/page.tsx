@@ -4,15 +4,19 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDictionary } from '@/lib/useDictionary';
 import { useSupabase } from '@/hooks/useSupabase';
+import { useNotifications } from '@/hooks/useNotifications';
+import useAuth from '@/hooks/useAuth';
+import AvatarUpload from '@/components/ui/AvatarUpload';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
 export default function ProfilePage() {
   const { dictionary, locale } = useDictionary();
-  const { profile, loading, updateProfile } = useSupabase();
+  const { profile, loading, updateProfile, updateAvatar } = useAuth();
+  const { showSuccess, showError, showInfo, showWarning } = useNotifications();
   const router = useRouter();
-  const [isEditing, setIsEditing] = useState(false);  const [formData, setFormData] = useState({
+  const [isEditing, setIsEditing] = useState(false);const [formData, setFormData] = useState({
     first_name: '',
     last_name: ''
   });
@@ -41,17 +45,39 @@ export default function ProfilePage() {
     router.push(`/${locale}/login`);
     return null;
   }
-
   const handleSave = async () => {
     setSaving(true);
     try {
       await updateProfile(formData);
       setIsEditing(false);
+      showSuccess(
+        'Профіль оновлено!', 
+        'Ваші дані успішно збережено.',
+        3000
+      );
     } catch (error) {
       console.error('Error updating profile:', error);
+      showError(
+        'Помилка збереження',
+        'Не вдалося оновити профіль. Спробуйте ще раз.',
+        5000
+      );
     } finally {
       setSaving(false);
     }
+  };
+
+  const testNotifications = () => {
+    showInfo('Тестове сповіщення', 'Це приклад інформаційного повідомлення', 3000);
+    setTimeout(() => {
+      showSuccess('Успіх!', 'Операція виконана успішно', 3000);
+    }, 1000);
+    setTimeout(() => {
+      showWarning('Попередження', 'Це попереджувальне повідомлення', 3000);
+    }, 2000);
+    setTimeout(() => {
+      showError('Помилка', 'Це повідомлення про помилку', 5000);
+    }, 3000);
   };
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -76,28 +102,14 @@ export default function ProfilePage() {
             {/* Profile Card */}
             <div className="lg:col-span-1">
               <Card className="p-6 bg-white border border-gray-200 shadow-sm">
-                <div className="text-center">
-                  {/* Avatar */}
-                  <div className="relative mx-auto mb-6">
-                    <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      {profile.avatar_url ? (
-                        <img
-                          src={profile.avatar_url}
-                          alt="Avatar"
-                          className="w-24 h-24 rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-3xl font-bold text-white">
-                          {(profile.first_name?.[0] || profile.email[0]).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <button className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </button>
+                <div className="text-center">                  {/* Avatar */}
+                  <div className="flex justify-center mb-6">
+                    <AvatarUpload
+                      currentAvatar={profile.avatar_url}
+                      onAvatarChange={updateAvatar}
+                      size="large"
+                      userName={profile.first_name || profile.email?.split('@')[0] || 'Користувач'}
+                    />
                   </div>
 
                   <h2 className="text-xl font-semibold text-gray-900 mb-1">
@@ -125,8 +137,15 @@ export default function ProfilePage() {
               <Card className="p-6 bg-white border border-gray-200 shadow-sm mt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {dictionary.common?.actions || 'Дії'}
-                </h3>
-                <div className="space-y-3">
+                </h3>                <div className="space-y-3">
+                  <Button 
+                    onClick={testNotifications}
+                    variant="secondary" 
+                    className="w-full justify-start bg-blue-50 hover:bg-blue-100 text-blue-600"
+                  >
+                    🔔
+                    <span className="ml-3">Тест сповіщень</span>
+                  </Button>
                   <Button variant="secondary" className="w-full justify-start">
                     <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m0 0a2 2 0 01-2 2m2-2V9a2 2 0 00-2-2m0 0V5a2 2 0 10-4 0v2m4 0H9" />

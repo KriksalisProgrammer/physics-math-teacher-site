@@ -3,6 +3,16 @@ import { cookies } from 'next/headers';
 import { Database } from '../types/database.types';
 
 export const createSupabaseServerClient = () => {
+  // Убираем проверку статического экспорта
+  // if (process.env.NEXT_PHASE === 'phase-export') {
+  //   return {
+  //     auth: {
+  //       getSession: () => ({ data: { session: null } }),
+  //       getUser: () => ({ data: { user: null } })
+  //     }
+  //   } as any;
+  // }
+
   const cookieStore = cookies();
   
   return createServerClient<Database>(
